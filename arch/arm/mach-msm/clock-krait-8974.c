@@ -39,6 +39,42 @@
 #include <mach/perflock.h>
 #endif
 
+//elementalx
+unsigned long arg_cpu_oc = 0;
+static int arg_vdd_uv = 0;
+
+static int __init cpufreq_read_cpu_oc(char *cpu_oc)
+{
+	unsigned long ui_khz;
+	int err;
+
+	err =  strict_strtoul(cpu_oc, 0, &ui_khz);
+	if (err)
+		arg_cpu_oc = 0;
+
+	arg_cpu_oc = ui_khz;
+	printk("elementalx: cpu_oc=%lu\n", arg_cpu_oc);
+	return 0;
+}
+__setup("cpu_oc=", cpufreq_read_cpu_oc);
+
+
+
+static int __init cpufreq_read_vdd_uv(char *vdd_uv)
+{
+	long arg, err;
+
+	err =  strict_strtol(vdd_uv, 0, &arg);
+	if (err)
+		arg_vdd_uv = 0;
+
+	arg_vdd_uv = arg;
+	printk("elementalx: vdd_uv=%d\n", arg_vdd_uv);
+	return 0;
+}
+__setup("vdd_uv=", cpufreq_read_vdd_uv);
+
+
 /* Clock inputs coming into Krait subsystem */
 DEFINE_FIXED_DIV_CLK(hfpll_src_clk, 1, NULL);
 DEFINE_FIXED_DIV_CLK(acpu_aux_clk, 2, NULL);
@@ -445,6 +481,7 @@ static void get_krait_bin_format_b(struct platform_device *pdev,
 	u32 pte_efuse, redundant_sel;
 	struct resource *res;
 	void __iomem *base;
+	int new_pvs;
 
 	*speed = 0;
 	*pvs = 0;
@@ -491,6 +528,15 @@ static void get_krait_bin_format_b(struct platform_device *pdev,
 	/* Check PVS_BLOW_STATUS */
 	pte_efuse = readl_relaxed(base + 0x4) & BIT(21);
 	if (pte_efuse) {
+		//elementalx
+		if (arg_vdd_uv) {
+			new_pvs = *pvs;
+			if ((new_pvs + arg_vdd_uv) > 14) 
+				*pvs = 15;
+			else
+				*pvs = new_pvs + arg_vdd_uv;
+		}
+
 		dev_info(&pdev->dev, "PVS bin: %d\n", *pvs);
 	} else {
 		dev_warn(&pdev->dev, "PVS bin not set. Defaulting to 0!\n");
@@ -657,6 +703,33 @@ static void krait_update_uv(int *uv, int num, int boost_uv)
 	}
 }
 
+//elementalx
+static void krait_update_freq(unsigned long *freq, int *uv, int *ua, int num)
+{
+	freq[num-1] = arg_cpu_oc*1000;
+
+
+	switch (arg_cpu_oc) {
+
+	case 2342400:
+		ua[num-1] = 751;
+		uv[num-1] = min(1120000, uv[num-1] + 15000);
+	case 2457600:
+		ua[num-1] = 802;
+		uv[num-1] = min(1120000, uv[num-1] + 35000);
+	case 2572800:
+		ua[num-1] = 831;
+		uv[num-1] = min(1120000, uv[num-1] + 55000);
+	case 2649600:
+		ua[num-1] = 854;
+		uv[num-1] = min(1120000, uv[num-1] + 70000);
+	}
+
+	printk("elementalx: uv=%d freq=%lu ua=%d\n", uv[num-1], freq[num-1]/1000, ua[num-1]);
+}
+
+
+
 static char table_name[] = "qcom,speedXX-pvsXX-bin-vXX";
 module_param_string(table_name, table_name, sizeof(table_name), S_IRUGO);
 static unsigned int pvs_config_ver;
@@ -780,6 +853,10 @@ static int clock_krait_8974_driver_probe(struct platform_device *pdev)
 			rows = ret;
 		}
 	}
+
+	//elementalx
+	if (arg_cpu_oc)
+		krait_update_freq(freq, uv, ua, rows);
 
 	krait_update_uv(uv, rows, pvs ? 25000 : 0);
 

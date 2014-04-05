@@ -42,6 +42,10 @@
 #define ENABLE_VOTED	4	/* Bit pol: 1 = running; delay on disable */
 #define DELAY		5	/* No bit to check, just delay */
 
+//elementalx
+extern unsigned long arg_cpu_oc;
+
+
 struct clk_register_data {
 	char *name;
 	u32 offset;
