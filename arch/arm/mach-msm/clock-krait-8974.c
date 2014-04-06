@@ -43,6 +43,10 @@
 unsigned long arg_cpu_oc = 0;
 static int arg_vdd_uv = 0;
 
+int pvs_number = 0;
+module_param(pvs_number, int, 0755); 
+
+
 static int __init cpufreq_read_cpu_oc(char *cpu_oc)
 {
 	unsigned long ui_khz;
@@ -529,6 +533,7 @@ static void get_krait_bin_format_b(struct platform_device *pdev,
 	pte_efuse = readl_relaxed(base + 0x4) & BIT(21);
 	if (pte_efuse) {
 		//elementalx
+		pvs_number = *pvs;
 		if (arg_vdd_uv) {
 			new_pvs = *pvs;
 			if ((new_pvs + arg_vdd_uv) > 14) 
