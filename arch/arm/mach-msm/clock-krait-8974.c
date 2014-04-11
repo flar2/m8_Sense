@@ -709,25 +709,42 @@ static void krait_update_uv(int *uv, int num, int boost_uv)
 }
 
 //elementalx
-static void krait_update_freq(unsigned long *freq, int *uv, int *ua, int num)
+static void krait_update_freq(unsigned long *freq, int *uv, int *ua, int num, int speed)
 {
-	freq[num-1] = arg_cpu_oc*1000;
 
+	if (speed == 3 && arg_cpu_oc <= 2457600) {
+		printk("elementalx: uv=%d freq=%lu ua=%d\n", uv[num-1], freq[num-1]/1000, ua[num-1]);
+		return;
+	}
+
+	freq[num-1] = arg_cpu_oc*1000;
 
 	switch (arg_cpu_oc) {
 
 	case 2342400:
 		ua[num-1] = 751;
 		uv[num-1] = min(1120000, uv[num-1] + 15000);
+		break;
 	case 2457600:
 		ua[num-1] = 802;
-		uv[num-1] = min(1120000, uv[num-1] + 35000);
+		uv[num-1] = min(1120000, uv[num-1] + 30000);
+		break;
 	case 2572800:
 		ua[num-1] = 831;
-		uv[num-1] = min(1120000, uv[num-1] + 55000);
+		uv[num-1] = min(1120000, uv[num-1] + 45000);
+		break;
 	case 2649600:
 		ua[num-1] = 854;
-		uv[num-1] = min(1120000, uv[num-1] + 70000);
+		uv[num-1] = min(1120000, uv[num-1] + 60000);
+		break;
+	case 2726400:
+		ua[num-1] = 876;
+		uv[num-1] = min(1120000, uv[num-1] + 75000);
+		break;
+	case 2803200:
+		ua[num-1] = 876;
+		uv[num-1] = min(1120000, uv[num-1] + 90000);
+		break;
 	}
 
 	printk("elementalx: uv=%d freq=%lu ua=%d\n", uv[num-1], freq[num-1]/1000, ua[num-1]);
@@ -860,8 +877,8 @@ static int clock_krait_8974_driver_probe(struct platform_device *pdev)
 	}
 
 	//elementalx
-	if (arg_cpu_oc)
-		krait_update_freq(freq, uv, ua, rows);
+	if (arg_cpu_oc > 0)
+		krait_update_freq(freq, uv, ua, rows, speed);
 
 	krait_update_uv(uv, rows, pvs ? 25000 : 0);
 

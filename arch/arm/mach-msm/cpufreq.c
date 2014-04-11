@@ -542,7 +542,7 @@ static int cpufreq_parse_dt(struct device *dev)
 		freq_table[i].frequency = f;
 
 		//elementalx
-		if (arg_cpu_oc)	
+		if (arg_cpu_oc > 0)	
 			freq_table[14].frequency = arg_cpu_oc;
 
 		if (l2_clk) {
