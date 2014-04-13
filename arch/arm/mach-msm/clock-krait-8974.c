@@ -723,27 +723,27 @@ static void krait_update_freq(unsigned long *freq, int *uv, int *ua, int num, in
 
 	case 2342400:
 		ua[num-1] = 751;
-		uv[num-1] = min(1120000, uv[num-1] + 15000);
+		uv[num-1] = min(1200000, uv[num-1] + 15000);
 		break;
 	case 2457600:
 		ua[num-1] = 802;
-		uv[num-1] = min(1120000, uv[num-1] + 30000);
+		uv[num-1] = min(1200000, uv[num-1] + 35000);
 		break;
 	case 2572800:
 		ua[num-1] = 831;
-		uv[num-1] = min(1120000, uv[num-1] + 45000);
+		uv[num-1] = min(1200000, uv[num-1] + 55000);
 		break;
 	case 2649600:
 		ua[num-1] = 854;
-		uv[num-1] = min(1120000, uv[num-1] + 60000);
+		uv[num-1] = min(1200000, uv[num-1] + 70000);
 		break;
 	case 2726400:
-		ua[num-1] = 876;
-		uv[num-1] = min(1120000, uv[num-1] + 75000);
+		ua[num-1] = 900;
+		uv[num-1] = min(1200000, uv[num-1] + 85000);
 		break;
 	case 2803200:
-		ua[num-1] = 876;
-		uv[num-1] = min(1120000, uv[num-1] + 90000);
+		ua[num-1] = 900;
+		uv[num-1] = min(1200000, uv[num-1] + 100000);
 		break;
 	}
 
