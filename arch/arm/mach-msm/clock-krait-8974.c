@@ -486,7 +486,6 @@ static void get_krait_bin_format_b(struct platform_device *pdev,
 	u32 pte_efuse, redundant_sel;
 	struct resource *res;
 	void __iomem *base;
-	int new_pvs;
 
 	*speed = 0;
 	*pvs = 0;
@@ -533,16 +532,6 @@ static void get_krait_bin_format_b(struct platform_device *pdev,
 	/* Check PVS_BLOW_STATUS */
 	pte_efuse = readl_relaxed(base + 0x4) & BIT(21);
 	if (pte_efuse) {
-		//elementalx
-		pvs_number = *pvs;
-		if (arg_vdd_uv) {
-			new_pvs = *pvs;
-			if ((new_pvs + arg_vdd_uv) > 14) 
-				*pvs = 15;
-			else
-				*pvs = new_pvs + arg_vdd_uv;
-		}
-
 		dev_info(&pdev->dev, "PVS bin: %d\n", *pvs);
 	} else {
 		dev_warn(&pdev->dev, "PVS bin not set. Defaulting to 0!\n");
@@ -707,6 +696,19 @@ static void krait_update_uv(int *uv, int num, int boost_uv)
 		for (i = 0; i < num; i++)
 			uv[i] += boost_uv;
 	}
+
+	switch (arg_vdd_uv) {
+
+	case 1:
+		uv[1] -= 15000;
+		break;
+	case 2:
+		uv[1] -= 30000;
+		break;
+	case 3:
+		uv[1] -= 45000;
+		break;
+	}
 }
 
 //elementalx
@@ -732,19 +734,19 @@ static void krait_update_freq(unsigned long *freq, int *uv, int *ua, int num, in
 		break;
 	case 2572800:
 		ua[num-1] = 831;
-		uv[num-1] = min(1200000, uv[num-1] + 55000);
+		uv[num-1] = min(1200000, uv[num-1] + 50000);
 		break;
 	case 2649600:
-		ua[num-1] = 854;
-		uv[num-1] = min(1200000, uv[num-1] + 70000);
+		ua[num-1] = 866;
+		uv[num-1] = min(1200000, uv[num-1] + 65000);
 		break;
 	case 2726400:
 		ua[num-1] = 900;
-		uv[num-1] = min(1200000, uv[num-1] + 85000);
+		uv[num-1] = min(1200000, uv[num-1] + 80000);
 		break;
 	case 2803200:
-		ua[num-1] = 900;
-		uv[num-1] = min(1200000, uv[num-1] + 100000);
+		ua[num-1] = 937;
+		uv[num-1] = min(1200000, uv[num-1] + 95000);
 		break;
 	}
 
