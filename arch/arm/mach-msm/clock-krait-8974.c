@@ -43,10 +43,8 @@
 //elementalx
 unsigned long arg_cpu_oc = 0;
 static int arg_vdd_uv = 0;
-
 int pvs_number = 0;
 module_param(pvs_number, int, 0755); 
-
 
 static int __init cpufreq_read_cpu_oc(char *cpu_oc)
 {
@@ -62,8 +60,6 @@ static int __init cpufreq_read_cpu_oc(char *cpu_oc)
 	return 0;
 }
 __setup("cpu_oc=", cpufreq_read_cpu_oc);
-
-
 
 static int __init cpufreq_read_vdd_uv(char *vdd_uv)
 {
@@ -523,6 +519,13 @@ static void get_krait_bin_format_b(struct platform_device *pdev,
 
 	/* Check SPEED_BIN_BLOW_STATUS */
 	if (pte_efuse & BIT(3)) {
+
+		//elementalx
+		if (arg_cpu_oc == 0 && *speed == 1)
+			arg_cpu_oc = 2265600;
+		else if (arg_cpu_oc == 0 && *speed == 3)
+			arg_cpu_oc = 2457600;
+					
 		dev_info(&pdev->dev, "Speed bin: %d\n", *speed);
 	} else {
 		dev_warn(&pdev->dev, "Speed bin not set. Defaulting to 0!\n");
@@ -532,6 +535,10 @@ static void get_krait_bin_format_b(struct platform_device *pdev,
 	/* Check PVS_BLOW_STATUS */
 	pte_efuse = readl_relaxed(base + 0x4) & BIT(21);
 	if (pte_efuse) {
+
+		//elementalx
+		pvs_number = *pvs;
+
 		dev_info(&pdev->dev, "PVS bin: %d\n", *pvs);
 	} else {
 		dev_warn(&pdev->dev, "PVS bin not set. Defaulting to 0!\n");
@@ -710,50 +717,6 @@ static void krait_update_uv(int *uv, int num, int boost_uv)
 		break;
 	}
 }
-
-//elementalx
-static void krait_update_freq(unsigned long *freq, int *uv, int *ua, int num, int speed)
-{
-
-	if (speed == 3 && arg_cpu_oc <= 2457600) {
-		printk("elementalx: uv=%d freq=%lu ua=%d\n", uv[num-1], freq[num-1]/1000, ua[num-1]);
-		return;
-	}
-
-	freq[num-1] = arg_cpu_oc*1000;
-
-	switch (arg_cpu_oc) {
-
-	case 2342400:
-		ua[num-1] = 751;
-		uv[num-1] = min(1200000, uv[num-1] + 15000);
-		break;
-	case 2457600:
-		ua[num-1] = 802;
-		uv[num-1] = min(1200000, uv[num-1] + 35000);
-		break;
-	case 2572800:
-		ua[num-1] = 831;
-		uv[num-1] = min(1200000, uv[num-1] + 50000);
-		break;
-	case 2649600:
-		ua[num-1] = 866;
-		uv[num-1] = min(1200000, uv[num-1] + 65000);
-		break;
-	case 2726400:
-		ua[num-1] = 900;
-		uv[num-1] = min(1200000, uv[num-1] + 80000);
-		break;
-	case 2803200:
-		ua[num-1] = 937;
-		uv[num-1] = min(1200000, uv[num-1] + 95000);
-		break;
-	}
-
-	printk("elementalx: uv=%d freq=%lu ua=%d\n", uv[num-1], freq[num-1]/1000, ua[num-1]);
-}
-
-
 
 static char table_name[] = "qcom,speedXX-pvsXX-bin-vXX";
 module_param_string(table_name, table_name, sizeof(table_name), S_IRUGO);
@@ -946,10 +909,6 @@ static int clock_krait_8974_driver_probe(struct platform_device *pdev)
 			rows = ret;
 		}
 	}
-
-	//elementalx
-	if (arg_cpu_oc > 0)
-		krait_update_freq(freq, uv, ua, rows, speed);
 
 	krait_update_uv(uv, rows, pvs ? 25000 : 0);
 

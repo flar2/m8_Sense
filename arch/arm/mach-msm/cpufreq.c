@@ -541,12 +541,14 @@ static int cpufreq_parse_dt(struct device *dev)
 		if (i > 0 && f <= freq_table[i-1].frequency)
 			break;
 
+		//elementalx
+		if (f > arg_cpu_oc) {
+			nf = i;
+			break;
+		}
+
 		freq_table[i].index = i;
 		freq_table[i].frequency = f;
-
-		//elementalx
-		if (arg_cpu_oc > 0)	
-			freq_table[14].frequency = arg_cpu_oc;
 
 		if (l2_clk) {
 			f = clk_round_rate(l2_clk, data[j++] * 1000);
