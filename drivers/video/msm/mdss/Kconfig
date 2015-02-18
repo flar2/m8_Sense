@@ -85,3 +85,10 @@ config MHL_MONITOR_WORKAROUND
 	Support the MHL function in some monitor.
 	Some monitor can't full support HDMI spec.
 	Workaound for this kind of issue
+
+config FB_MSM_MDSS_KCAL_CTRL
+	depends on FB_MSM_MDSS
+	bool "MDSS color control"
+	---help---
+	  Enable sysfs for rgb/lut control for mdss-mdp display controllers
+	  in the MDSS sub-system.

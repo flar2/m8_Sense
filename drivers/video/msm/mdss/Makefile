@@ -49,3 +49,4 @@ obj-$(CONFIG_FB_MSM_MDSS_HDMI_MHL_SII9234) += sii9234/
 obj-$(CONFIG_FB_MSM_MDSS_HDMI_MHL_SII8240_SII8558) += sii8240_8558/
 
 obj-$(CONFIG_FB_MSM_MDSS_DSI_CTRL_STATUS) += mdss_dsi_status.o
+obj-$(CONFIG_FB_MSM_MDSS_KCAL_CTRL) += mdss_mdp_kcal_ctrl.o
