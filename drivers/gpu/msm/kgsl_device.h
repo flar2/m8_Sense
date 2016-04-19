@@ -30,7 +30,6 @@
 #define KGSL_TIMEOUT_DEFAULT        0xFFFFFFFF
 #define KGSL_TIMEOUT_PART           50 
 
-#define FIRST_TIMEOUT (HZ / 2)
 
 
 
