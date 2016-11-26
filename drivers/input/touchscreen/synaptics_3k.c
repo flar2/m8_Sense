@@ -312,9 +312,9 @@ static int synaptics_ts_suspend(struct device *dev);
 #define SWEEP_DOWN 0x08
 #define DT2W_TIMEOUT_MAX 500
 #define DT2W_DELTA 230
-#define S2W_PWRKEY_DUR 60
-#define GEST_TIMEOUT 70
-#define SWEEP_TIMEOUT 30
+#define S2W_PWRKEY_DUR 100
+#define GEST_TIMEOUT 90
+#define SWEEP_TIMEOUT 50
 #define BOOT_MODE_TIMEOUT 10000
 #define WAKE_MOTION 0x07
 #define WAKE_MOTION_HIDI 0x0b
@@ -452,7 +452,7 @@ static void dt2w_func(int x, int y, cputime64_t trigger_time)
 						|| (dt_prev_x == 0 && dt_prev_y == 0)) {
                         reset_dt2w();
 			pr_info("[WG]: doubletap\n");
-			wake_lock_timeout(&wg_wakelock, HZ/2);
+			wake_lock_timeout(&wg_wakelock, 150);
 			if (dt2w_switch && gestures_switch) {
 				report_gesture(15);
 			} else if (dt2w_switch) {
@@ -505,7 +505,7 @@ static void sweep2wake_vert_func(int x, int y)
 						if (y < (nexty - 160)) {
 							if (exec_county && (jiffies - firsty_time < SWEEP_TIMEOUT)) {
 								pr_info("[WG]: sweep up\n");
-								wake_lock_timeout(&wg_wakelock, HZ/2);
+								wake_lock_timeout(&wg_wakelock, 150);
 								if (gestures_switch) {
 									report_gesture(2);
 								} else {
@@ -532,7 +532,7 @@ static void sweep2wake_vert_func(int x, int y)
 						if (y > (nexty + 160)) {
 							if (exec_county && (jiffies - firsty_time < SWEEP_TIMEOUT)) {
 								pr_info("[WG]: sweep down\n");
-								wake_lock_timeout(&wg_wakelock, HZ/2);
+								wake_lock_timeout(&wg_wakelock, 150);
 								if (gestures_switch) {
 									report_gesture(3);
 								} else {
@@ -583,7 +583,7 @@ static void sweep2wake_horiz_func(int x, int y, int wake)
 					if (x > (nextx + 180)) {
 						if (exec_countx && (jiffies - firstx_time < SWEEP_TIMEOUT)) {
 							pr_info("[WG]: sweep right\n");
-							wake_lock_timeout(&wg_wakelock, HZ/2);
+							wake_lock_timeout(&wg_wakelock, 150);
 							if (gestures_switch && wake) {
 								report_gesture(5);
 							} else {
@@ -610,7 +610,7 @@ static void sweep2wake_horiz_func(int x, int y, int wake)
 					if (x < (nextx - 180)) {
 						if (exec_countx && (jiffies - firstx_time < SWEEP_TIMEOUT)) {
 							pr_info("[WG]: sweep left\n");
-							wake_lock_timeout(&wg_wakelock, HZ/2);
+							wake_lock_timeout(&wg_wakelock, 150);
 							if (gestures_switch && wake) {
 								report_gesture(4);
 							} else {
